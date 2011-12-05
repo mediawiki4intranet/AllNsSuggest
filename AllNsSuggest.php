@@ -31,14 +31,18 @@ $wgExtensionCredits['other'][] = array(
 
 $wgHooks['PrefixSearchBackend'][] = 'AllNsSuggestPrefixSearch';
 
+# $namespaces is ignored
+# We suggest from either from all namespaces or from one specified in $search as prefix
+
 function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
 {
     $dbr = wfGetDB(DB_SLAVE);
-    $where = array('page_title LIKE '.$dbr->addQuotes(str_replace(' ', '_', $search).'%'));
-    if (count($namespaces) > 1 || $namespaces[0] != NS_MAIN)
-        $ns = $namespaces;
+    $nstest = Title::newFromText($search.'A');
+    if ($nstest && $nstest->getNamespace() != NS_MAIN)
+        $ns = array($nstest->getNamespace());
     else
     {
+        $where = array('page_title LIKE '.$dbr->addQuotes(str_replace(' ', '_', $search).'%'));
         $res = $dbr->select('page', 'page_namespace', $where, __METHOD__, array('GROUP BY' => 'page_namespace'));
         $ns = array();
         foreach ($res as $row)
