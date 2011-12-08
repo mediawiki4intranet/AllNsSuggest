@@ -31,15 +31,22 @@ $wgExtensionCredits['other'][] = array(
 
 $wgHooks['PrefixSearchBackend'][] = 'AllNsSuggestPrefixSearch';
 
-# $namespaces is ignored
+# $namespaces and $search is really ignored
 # We suggest from either from all namespaces or from one specified in $search as prefix
+# $search is taken directly from request
 
 function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
 {
+    global $wgRequest;
     $dbr = wfGetDB(DB_SLAVE);
+    $search = $wgRequest->getVal('search');
     $nstest = Title::newFromText($search.'A');
+    $where = array();
     if ($nstest && $nstest->getNamespace() != NS_MAIN)
+    {
+        $where = array('page_title LIKE '.$dbr->addQuotes(substr($nstest->getDBkey(), 0, -1).'%'));
         $ns = array($nstest->getNamespace());
+    }
     else
     {
         $where = array('page_title LIKE '.$dbr->addQuotes(str_replace(' ', '_', $search).'%'));
@@ -55,6 +62,8 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
             __METHOD__, array('ORDER BY' => 'page_title', 'LIMIT' => $limit)
         );
     $sql = count($sql) > 1 ? '('.implode(') UNION (', $sql).')' : $sql[0];
+    wfDebug(var_export($ns, true));
+    wfDebug($sql);
     $res = $dbr->query($sql, __METHOD__);
     $titles = array();
     foreach ($res as $row)
