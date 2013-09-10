@@ -69,7 +69,7 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
     foreach ($res as $row)
     {
         $t = Title::newFromRow($row);
-        if (!method_exists($t, 'userCanReadEx') || $t->userCanReadEx()) // HaloACL/IntraACL support
+        if ($t->userCanRead())
             $titles[] = $t->getPrefixedText();
     }
     return false;
