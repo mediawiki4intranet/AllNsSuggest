@@ -38,7 +38,9 @@ $wgHooks['PrefixSearchBackend'][] = 'AllNsSuggestPrefixSearch';
 function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
 {
     global $wgRequest;
+    global $wgCanonicalNamespaceNames;
     $dbr = wfGetDB(DB_SLAVE);
+    $canon = $wgRequest->getVal('canonicalns');
     $search = $wgRequest->getVal('search');
     $nstest = Title::newFromText($search.'A');
     $where = array();
@@ -73,7 +75,14 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
         $t = Title::newFromRow($row);
         if ($t->userCanRead())
         {
-            $titles[] = $t->getPrefixedText();
+            if ($canon)
+            {
+                $titles[] = ($t->getNamespace() ? str_replace('_', ' ', $wgCanonicalNamespaceNames[$t->getNamespace()]).':' : '').$t->getText();
+            }
+            else
+            {
+                $titles[] = $t->getPrefixedText();
+            }
         }
     }
     return false;
