@@ -53,24 +53,28 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
         $res = $dbr->select('page', 'page_namespace', $where, __METHOD__, array('GROUP BY' => 'page_namespace'));
         $ns = array();
         foreach ($res as $row)
+        {
             $ns[] = $row->page_namespace;
+        }
     }
     $sql = array();
     foreach ($ns as $k)
+    {
         $sql[] = $dbr->selectSQLText(
             'page', '*', $where + array('page_namespace' => $k),
             __METHOD__, array('ORDER BY' => 'page_title', 'LIMIT' => $limit)
         );
+    }
     $sql = count($sql) > 1 ? '('.implode(') UNION (', $sql).')' : $sql[0];
-    wfDebug(var_export($ns, true));
-    wfDebug($sql);
     $res = $dbr->query($sql, __METHOD__);
     $titles = array();
     foreach ($res as $row)
     {
         $t = Title::newFromRow($row);
         if ($t->userCanRead())
+        {
             $titles[] = $t->getPrefixedText();
+        }
     }
     return false;
 }
