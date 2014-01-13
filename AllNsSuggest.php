@@ -59,6 +59,11 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
             $ns[] = $row->page_namespace;
         }
     }
+    $titles = array();
+    if (!$ns)
+    {
+        return false;
+    }
     $sql = array();
     foreach ($ns as $k)
     {
@@ -69,7 +74,6 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
     }
     $sql = count($sql) > 1 ? '('.implode(') UNION (', $sql).')' : $sql[0];
     $res = $dbr->query($sql, __METHOD__);
-    $titles = array();
     foreach ($res as $row)
     {
         $t = Title::newFromRow($row);
