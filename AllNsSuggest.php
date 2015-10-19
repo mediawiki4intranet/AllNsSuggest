@@ -77,7 +77,7 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
     foreach ($res as $row)
     {
         $t = Title::newFromRow($row);
-        if ($t->userCanRead())
+        if ($t->userCan('read'))
         {
             if ($canon)
             {
