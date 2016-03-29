@@ -79,14 +79,10 @@ function AllNsSuggestPrefixSearch($namespaces, $search, $limit, &$titles)
         $t = Title::newFromRow($row);
         if ($t->userCan('read'))
         {
-            if ($canon)
-            {
+            if ($canon && isset($wgCanonicalNamespaceNames[$t->getNamespace()]))
                 $titles[] = ($t->getNamespace() ? str_replace('_', ' ', $wgCanonicalNamespaceNames[$t->getNamespace()]).':' : '').$t->getText();
-            }
             else
-            {
                 $titles[] = $t->getPrefixedText();
-            }
         }
     }
     return false;
